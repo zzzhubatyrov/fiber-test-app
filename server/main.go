@@ -22,6 +22,8 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
+	//est web-app on Fiber library [Go + Java]
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		resultChan := make(chan string)
 
