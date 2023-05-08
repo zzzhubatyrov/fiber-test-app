@@ -1,23 +1,49 @@
-import logo from './logo.svg';
+import axios from "axios";
+import React, { useState } from "react";
 import './App.css';
 
-function App() {
+
+const App = () => {
+  const [user, setUser] = useState("")
+  const [name, setName] = useState("")
+  const [message, setMessage] = useState("")
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await axios.get(`http://localhost:5000/${name}`)
+      setUser(res.data)
+      console.log(res)
+      console.log(res.data.name)
+    } catch (error) {
+      console.log(error)
+      setMessage("An error occured")
+    }
+  }
+
+  // useEffect(() => {
+  //   axios.get("http://localhost:5000")
+  //   .then(res => {
+  //     setUser(res.data)
+  //   })
+  //   .catch(err => console.log(err))
+  // }, [])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Enter your name:
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+          </label>
+          <button type="submit">Submit</button>
+        </form>
+        {message && <p>{message}</p>}
+
+        <div>id: {user.id}</div>
+        <div>name: {user.name}</div>
+      </div>
     </div>
   );
 }
