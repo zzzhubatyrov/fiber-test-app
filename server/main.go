@@ -1,18 +1,21 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
+
+	"fiber-test-app/internal/handlers/todoHandler"
+	"fiber-test-app/internal/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type User struct {
-	ID   int
-	Name string
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 func main() {
@@ -23,48 +26,56 @@ func main() {
 	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		resultChan := make(chan string)
-
-		go func() {
-			time.Sleep(1 * time.Second)
-			userData := map[int]string{
-				1: "Hello World!",
-			}
-			usersJSON, err := json.Marshal(userData)
-			if err != nil {
-				resultChan <- err.Error()
-				return
-			}
-			resultChan <- string(usersJSON)
-		}()
-
-		return c.JSON(<-resultChan)
+		return c.SendString("Hello World")
 	})
 
-	app.Get("/:name", func(c *fiber.Ctx) error {
-		resultChan := make(chan string)
-		name := c.Params("name")
-
-		userData := map[int]User{
-			1: {ID: 1, Name: name},
-		}
-
-		// &User{
-		// 	ID:   1,
-		// 	Name: name,
-		// }
-
+	app.Get("/create-models", func(c *fiber.Ctx) error {
 		go func() {
 			time.Sleep(1 * time.Second)
-			usersJSON, err := json.Marshal(userData)
-			if err != nil {
-				resultChan <- err.Error()
-				return
-			}
-
-			resultChan <- string(usersJSON)
+			todos := []models.Todo{}
+			todoHandler.CreateModel(todos)
 		}()
+		if err := c.Redirect("/", fiber.StatusMovedPermanently); err != nil {
+			return err
+		}
+		return nil
+	})
 
+	app.Get("/check-todo", func(c *fiber.Ctx) error {
+		resultTodo := make(chan []models.Todo)
+		var req models.Todo
+		if err := c.BodyParser(&req); err != nil {
+			return err
+		}
+		go func() {
+			time.Sleep(1 * time.Second)
+			todos, _ := todoHandler.CheckTodo([]models.Todo{
+				{
+					Title:     req.Title,
+					Completed: req.Completed,
+				},
+			})
+			resultTodo <- todos
+		}()
+		return c.JSON(<-resultTodo)
+	})
+
+	app.Post("/create-todo", func(c *fiber.Ctx) error {
+		resultChan := make(chan []models.Todo)
+		var req models.Todo
+		if err := c.BodyParser(&req); err != nil {
+			return err
+		}
+		go func() {
+			time.Sleep(1 * time.Second)
+			createTodo, _ := todoHandler.CreateTodo([]models.Todo{
+				{
+					Title:     req.Title,
+					Completed: req.Completed,
+				},
+			})
+			resultChan <- createTodo
+		}()
 		return c.JSON(<-resultChan)
 	})
 
