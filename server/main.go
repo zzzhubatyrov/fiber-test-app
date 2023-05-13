@@ -3,20 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
-	"fiber-test-app/internal/handlers/todoHandler"
-	"fiber-test-app/internal/models"
+	"fiber-test-app/internal/handlers"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
-
-type User struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
 
 func main() {
 	app := fiber.New()
@@ -25,59 +17,19 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello World")
-	})
+	// GET requests
+	app.Get("/", handlers.MainPage)
+	app.Get("/check-todo", handlers.CheckTodo)
 
-	app.Get("/create-models", func(c *fiber.Ctx) error {
-		go func() {
-			time.Sleep(1 * time.Second)
-			todos := []models.Todo{}
-			todoHandler.CreateModel(todos)
-		}()
-		if err := c.Redirect("/", fiber.StatusMovedPermanently); err != nil {
-			return err
-		}
-		return nil
-	})
+	// POST requests
+	app.Post("/create-todo", handlers.CreateTodo)
+	app.Post("/create-group", handlers.CreateGroup)
 
-	app.Get("/check-todo", func(c *fiber.Ctx) error {
-		resultTodo := make(chan []models.Todo)
-		var req models.Todo
-		if err := c.BodyParser(&req); err != nil {
-			return err
-		}
-		go func() {
-			time.Sleep(1 * time.Second)
-			todos, _ := todoHandler.CheckTodo([]models.Todo{
-				{
-					Title:     req.Title,
-					Completed: req.Completed,
-				},
-			})
-			resultTodo <- todos
-		}()
-		return c.JSON(<-resultTodo)
-	})
+	// DELETE requests
+	app.Delete("/delete-todo/:id", handlers.DeleteTodo)
 
-	app.Post("/create-todo", func(c *fiber.Ctx) error {
-		resultChan := make(chan []models.Todo)
-		var req models.Todo
-		if err := c.BodyParser(&req); err != nil {
-			return err
-		}
-		go func() {
-			time.Sleep(1 * time.Second)
-			createTodo, _ := todoHandler.CreateTodo([]models.Todo{
-				{
-					Title:     req.Title,
-					Completed: req.Completed,
-				},
-			})
-			resultChan <- createTodo
-		}()
-		return c.JSON(<-resultChan)
-	})
+	// PUT requests
+	app.Put("/update-todo/:id", handlers.UpdateTodo)
 
 	fmt.Println("Starting server on port 5000...")
 	log.Fatal(app.Listen(":5000"))

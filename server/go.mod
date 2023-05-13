@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/gammazero/deque v0.2.1 // indirect
+	github.com/gammazero/workerpool v1.1.3 // indirect
 	github.com/gofiber/fiber/v2 v2.45.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
