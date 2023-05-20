@@ -1,13 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import './App.css';
-
+import './components/todo/todo.js';
+import TodoItem from "./components/todo/todo.js";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenGroup, setIsOpenGroup] = useState(false)
   const [title, setTitle] = useState("")
-  // const [completed, setCompleted] = useState(false)
+  const [description, setDescription] = useState("")
   const [todos, setTodos] = useState([]);
 
   useEffect(() => {
@@ -26,32 +27,13 @@ const App = () => {
   const createTodo = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post("http://localhost:5000/create-todo", {title: title})
+      const response = await axios.post("http://localhost:5000/create-todo", {title: title, description: description})
       setTitle("")
+      setDescription("")
       getTodos()
       console.log(response.data)
     } catch (error) {
       console.log(error)
-    }
-  }
-
-  const handleDelete = async (id) => {
-    try {
-      const res = await axios.delete(`http://localhost:5000/delete-todo/${id}`)
-      getTodos()
-      console.log(res.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const handleCompleted = async (id, title, completed) => {
-    try {
-      const res = await axios.put(`http://localhost:5000/update-todo/${id}`, { id, title, completed });
-      getTodos();
-      console.log(res.data)
-    } catch (error) {
-      console.log(error);
     }
   }
 
@@ -102,27 +84,17 @@ const App = () => {
                 <p>Введите имя группы: </p>
               </div>
               <form className="modal-footer">
-                <button type="submit" className="btn primary">Добавить</button>
+                <button disabled={true} type="submit" className="btn primary">Добавить</button>
               </form>
             </div>
           </div>
         )}
         <div className="todos-container">
           {todos && todos.map(todo => (
-            <div className="todos" key={todo.ID}>  
-              <h2 className="title">{todo.Title}</h2>
-              <div className="todoIsDone">
-                {todo.Completed.toString()}
-                <input 
-                  checked={todo.Completed} 
-                  onChange={() => handleCompleted(todo.ID, todo.Title, !todo.Completed)} 
-                  type="checkbox"
-                  name="checkbox"
-                />
-              </div>
-              <button onClick={() => handleDelete(todo.ID)}>Delete</button>
+            <div key={todo.ID}>
+              <TodoItem todo={todo} />
             </div>
-          ))}
+          ))}         
         </div>
         {/* <div className="todos-container"></div> */}
       </div>
@@ -134,7 +106,8 @@ const App = () => {
               <button onClick={handleCloseModal} className="close-modal">&times;</button>
             </div>
             <div className="modal-body">
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} />
+              <input placeholder="Title" type="text" value={title} onChange={e => setTitle(e.target.value)} />
+              <input placeholder="Description" type="text" value={description} onChange={e => setDescription(e.target.value)} />
               {/* <p>Modal content goes here.</p> */}
             </div>
             <form className="modal-footer" onSubmit={createTodo}>

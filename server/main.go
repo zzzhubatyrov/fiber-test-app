@@ -18,18 +18,18 @@ func main() {
 	}))
 
 	// GET requests
-	app.Get("/", handlers.MainPage)
-	app.Get("/check-todo", handlers.CheckTodo)
+	app.Get("/", handlers.MainPageHandler)
+	app.Get("/check-todo", handlers.CheckTodoHandler)
 
 	// POST requests
-	app.Post("/create-todo", handlers.CreateTodo)
-	app.Post("/create-group", handlers.CreateGroup)
+	app.Post("/create-todo", handlers.CreateTodoHandler)
+	app.Post("/create-group", handlers.CreateGroupHandler)
 
 	// DELETE requests
-	app.Delete("/delete-todo/:id", handlers.DeleteTodo)
+	app.Delete("/delete-todo/:id", handlers.DeleteTodoHandler)
 
 	// PUT requests
-	app.Put("/update-todo/:id", handlers.UpdateTodo)
+	app.Put("/update-todo/:id", handlers.UpdateTodoHandler)
 
 	fmt.Println("Starting server on port 5000...")
 	log.Fatal(app.Listen(":5000"))

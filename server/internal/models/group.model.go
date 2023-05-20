@@ -15,7 +15,6 @@ type Group struct {
 	CreatedAt time.Time      `json:"CreatedAt"`
 	UpdatedAt time.Time      `json:"UpdatedAt"`
 	DeletedAt gorm.DeletedAt `json:"DeletedAt,omitempty"`
-	Todos     []Todo         `json:"Todos" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func init() {

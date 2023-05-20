@@ -14,8 +14,6 @@ type Todo struct {
 	Title       string         `json:"Title" gorm:"type:varchar(100);not null"`
 	Description string         `json:"Description" gorm:"type:varchar(255);not null"`
 	Completed   bool           `json:"Completed" gorm:"type:boolean;default:false"`
-	GroupID     uint           `json:"GroupID"`
-	Group       *Group         `json:"Group" gorm:"foreignKey:GroupID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CreatedAt   time.Time      `json:"CreatedAt"`
 	UpdatedAt   time.Time      `json:"UpdatedAt"`
 	DeletedAt   gorm.DeletedAt `json:"DeletedAt,omitempty"`
@@ -29,7 +27,7 @@ func init() {
 	}
 
 	migrator := db.Migrator()
-	if !migrator.HasTable(&Todo{}) {
+	if !migrator.HasTable(Todo{}) {
 		if err := db.AutoMigrate(&Todo{}); err != nil {
 			log.Fatal(err)
 			return

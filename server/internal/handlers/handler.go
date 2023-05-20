@@ -14,33 +14,44 @@ import (
 // handler link
 var pool = workerpool.New(10)
 
-func MainPage(c *fiber.Ctx) error {
+func MainPageHandler(c *fiber.Ctx) error {
 	return c.SendString("Hello World")
 }
 
-func CheckTodo(c *fiber.Ctx) error {
-	var req models.Todo
-
+func CheckTodoHandler(c *fiber.Ctx) error {
 	resultTodo := make(chan []models.Todo)
 	pool.Submit(func() {
-		checkTodo, _ := todoHandlers.CheckTodo([]models.Todo{
-			{
-				Title:     req.Title,
-				Completed: req.Completed,
-			},
-		})
+		checkTodo, _ := todoHandlers.CheckTodo([]models.Todo{})
 		resultTodo <- checkTodo
 	})
 	return c.JSON(<-resultTodo)
 }
 
-func CreateTodo(c *fiber.Ctx) error {
-	resultChan := make(chan string)
+func CreateTodoHandler(c *fiber.Ctx) error {
+	var req models.Todo
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
 
+	resultChan := make(chan []models.Todo)
+	pool.Submit(func() {
+		createTodo, err := todoHandlers.CreateTodo([]models.Todo{
+			{
+				Title:       req.Title,
+				Description: req.Description,
+				Completed:   req.Completed,
+			},
+		})
+		if err != nil {
+			resultChan <- []models.Todo{}
+			return
+		}
+		resultChan <- createTodo
+	})
 	return c.JSON(<-resultChan)
 }
 
-func DeleteTodo(c *fiber.Ctx) error {
+func DeleteTodoHandler(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
@@ -61,22 +72,20 @@ func DeleteTodo(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func UpdateTodo(c *fiber.Ctx) error {
+func UpdateTodoHandler(c *fiber.Ctx) error {
 	id := c.Params("id")
+	// description := c.Params("description")
 	var req models.Todo
-
 	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
-
 	if err := todoHandlers.UpdateTodo(id, &req); err != nil {
 		return err
 	}
-
 	return c.JSON(req)
 }
 
-func CreateGroup(c *fiber.Ctx) error {
+func CreateGroupHandler(c *fiber.Ctx) error {
 	var req models.Group
 	if err := c.BodyParser(&req); err != nil {
 		return err

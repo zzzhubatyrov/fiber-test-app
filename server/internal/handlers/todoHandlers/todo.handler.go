@@ -10,31 +10,20 @@ func CheckTodo(model []models.Todo) ([]models.Todo, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	db.Find(&model)
+	if err := db.Find(&model).Error; err != nil {
+		return nil, err
+	}
 	return model, nil
-
 }
 
-// func CreateTodo(model []models.Todo) ([]models.Todo, error) {
-// 	db, err := config.Connect()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	db.Create(&model)
-// 	return model, nil
-// }
-
-func CreateTodo(models *models.Todo) (*models.Todo, error) {
+func CreateTodo(models []models.Todo) ([]models.Todo, error) {
 	db, err := config.Connect()
 	if err != nil {
 		return nil, err
 	}
-
-	if err := db.Create(models).Error; err != nil {
+	if err := db.Create(&models).Error; err != nil {
 		return nil, err
 	}
-
 	return models, nil
 }
 
@@ -43,7 +32,6 @@ func DeleteTodo(id uint) error {
 	if err != nil {
 		return err
 	}
-
 	var todo models.Todo
 	if err := db.Where("id = ?", id).First(&todo).Error; err != nil {
 		return err
@@ -51,7 +39,6 @@ func DeleteTodo(id uint) error {
 	if err := db.Delete(&todo).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -60,19 +47,18 @@ func UpdateTodo(id string, todo *models.Todo) error {
 	if err != nil {
 		return err
 	}
-
 	var existingTodo models.Todo
 	if err := db.Where("id = ?", id).First(&existingTodo).Error; err != nil {
 		return err
 	}
 
 	existingTodo.Title = todo.Title
+	existingTodo.Description = todo.Description
 	existingTodo.Completed = todo.Completed
 
 	if err := db.Save(&existingTodo).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 
