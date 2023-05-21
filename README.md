@@ -1,2 +1,2 @@
 # fiber-test-app
-Test web-app on Fiber library [Go + Java]
+Test web-app on Fiber library
